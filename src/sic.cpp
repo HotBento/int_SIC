@@ -14,7 +14,7 @@ SIC::SIC(int keep_num, int k, double beta, string db_place, int N) : MAX_KEEP_NU
 void SIC::RealTimeInfluenceMaximization()
 {
   string line;
-  while(db.getline(line, 200))
+  while(getline(db, line))
   {
     sievestream_list.push_back(SieveStream(k, beta));
     available.push_back(true);
