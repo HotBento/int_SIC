@@ -16,17 +16,23 @@ void SIC::RealTimeInfluenceMaximization()
   string line;
   while(getline(db, line))
   {
+    vector<string> line_arg;
+    boost::split(line_arg, line, boost::is_any_of(" "), boost::token_compress_on);
+    int author = atoi(line_arg.at(0).c_str());
+    int parent_author = atoi(line_arg.at(1).c_str());
+    int time = atoi(line_arg.at(2).c_str());
     sievestream_list.push_back(SieveStream(k, beta));
     available.push_back(true);
     if(available.at(0) == false)
     {
-      for(auto& j : sic->sievestream_list)
+      for(auto& j : sievestream_list)
       {
         //update each SieveStream oracle
-        // j.Process(pair<int, int>(parent_author, author));
+        j.Process(pair<int, int>(parent_author, author));
+        current_time = time;
       }
-      sic->available.erase(sic->available.begin());
-      return 0;
+      available.erase(available.begin());
+      return;
     }
   }
   

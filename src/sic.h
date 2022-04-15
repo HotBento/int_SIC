@@ -4,6 +4,7 @@
 // #include "infgraph.h"
 #include <sqlite3.h>
 #include <fstream>
+#include <boost/algorithm/string.hpp>
 
 class Argument
 {
@@ -28,7 +29,7 @@ private:
     const int N;//max keep number of checkpoints
     const double beta;
     // const double approximation;
-    int current_utc;
+    int current_time;
     ifstream db;
 public:
 	void RealTimeInfluenceMaximization();
