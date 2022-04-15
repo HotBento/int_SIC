@@ -34,6 +34,51 @@ void SIC::RealTimeInfluenceMaximization()
       available.erase(available.begin());
       return;
     }
+    //to check
+    for(int i = 0; i < available.size(); ++i)
+    {
+      if(available.at(i)) sievestream_list.at(i).Process(pair<int, int>(parent_author, author)); 
+    }
+    int end = available.size()-2;
+    while(available.at(end) == false) --end;
+    for(int i = 0; i < end; ++i)
+    {
+      if(available.at(i))
+      {
+        for(int j = i+1; j < end; ++j)
+        {
+          if(available.at(j) == false) continue;
+          int next_availale = j + 1;
+          while(available.at(next_availale) == false) ++next_availale;
+          if(sievestream_list.at(j).seed_influence_value >= (1-beta) * sievestream_list.at(i).seed_influence_value
+          && sievestream_list.at(next_availale).seed_influence_value >= (1-beta) * sievestream_list.at(i).seed_influence_value)
+          {
+            available[j] = false;
+          }
+          else break;
+        }
+      }
+    }
+    if(available.at(1))
+    {
+      available.erase(available.begin());
+      sievestream_list.erase(sievestream_list.begin());
+    }
+    else
+    {
+      available.erase(available.begin()+1);
+      sievestream_list.erase(sievestream_list.begin()+1);
+    }
+
+    if(current_time%100 == 0 && current_time != time)
+    {
+      current_time = time;
+      cout << "Current time: " << current_time << endl;
+      sievestream_list[0].PrintResult();
+      cout << "--------------------------------------------------------------------------------" << endl;
+    }
+
+    return;
   }
   
 }
