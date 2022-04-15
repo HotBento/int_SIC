@@ -10,6 +10,7 @@
     "list": "cpp",
     "vector": "cpp",
     "initializer_list": "cpp",
-    "ostream": "cpp"
+    "ostream": "cpp",
+    "fstream": "cpp"
   }
 }

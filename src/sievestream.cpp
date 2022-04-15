@@ -1,15 +1,21 @@
 #include "sievestream.h"
+#define DEBUG_TIME 0
 
 void SieveStream::Process(pair<int, int> action)
 {
+  #if(DEBUG_TIME==1)
+  clock_t start = clock();
+  cout << "---------------------------------" << endl;
+  #endif
   //update user_list
   unprocessed_user_list.clear();
-  auto iter_tmp0 = find(user_list.begin(), user_list.end(), action.first);
+  // auto iter_tmp0 = find(user_list.begin(), user_list.end(), action.first);
+  auto iter_tmp0 = find_if(user_list.begin(), user_list.end(), FinderFirst(action.first));
   if(iter_tmp0 == user_list.end())
   {
     vector<int> tmp;
     tmp.push_back(action.first);
-    auto iter_tmp1 = find(user_list.begin(), user_list.end(), action.second);
+    auto iter_tmp1 = find_if(user_list.begin(), user_list.end(), FinderFirst(action.second));
     if(iter_tmp1 == user_list.end())
     {
       tmp.push_back(action.second);
@@ -35,7 +41,7 @@ void SieveStream::Process(pair<int, int> action)
       (*iter_tmp0).second.push_back(action.second);
       UnprocessedListAppend(*iter_tmp0);
     }
-    auto iter_tmp1 = find(user_list.begin(), user_list.end(), action.second);
+    auto iter_tmp1 = find_if(user_list.begin(), user_list.end(), FinderFirst(action.second));
     if(iter_tmp1 == user_list.end())
     {
       auto tmp_pair = pair<int, vector<int>>(action.second, vector<int>(1, action.second));
@@ -43,6 +49,10 @@ void SieveStream::Process(pair<int, int> action)
       UnprocessedListAppend(tmp_pair);
     }
   }
+  #if(DEBUG_TIME==1)
+  clock_t update_userlist_time = clock();
+  cout << "Update userlist time: " << update_userlist_time - start << endl;
+  #endif
   //update rr_user_list
   bool is_first_in_rr = false;
   bool is_second_in_rr = false;
@@ -65,8 +75,18 @@ void SieveStream::Process(pair<int, int> action)
     rr_user_list.push_back(pair<int, vector<int>>(action.second, vector<int>(1, action.second)));
     rr_user_list.back().second.push_back(action.first);
   }
+
+  #if(DEBUG_TIME==1)
+  clock_t update_rruserlist_time = clock();
+  cout << "Update rruserlist time: " << update_rruserlist_time - update_userlist_time << endl;
+  #endif
   
   UpdateStream();
+
+  #if(DEBUG_TIME==1)
+  clock_t update_stream_time = clock();
+  cout << "Update stream time: " << update_stream_time - update_rruserlist_time << endl;
+  #endif
 
 }
 
@@ -153,10 +173,10 @@ void SieveStream::PrintResult()
     cout << "Error: No seed set found." << endl;
     return;
   }
-  cout << "Seed set: \"" << seed_user[0] << "\"";
+  cout << "Seed set: \"" << seed_user.at(0) << "\"";
   for(int i : seed_user)
   {
-    if(i == seed_user[0]) continue;
+    if(i == seed_user.at(0)) continue;
     cout << ", \"" << i << "\"";
   }
   cout << ";" << endl;
@@ -168,3 +188,11 @@ SieveStreamInstance::SieveStreamInstance(double opt, vector<int> seed_set, vecto
   
 }
 
+FinderFirst::FinderFirst(int num):num(num)
+{
+
+}
+bool FinderFirst::operator()(pair<int, vector<int>> p)
+{
+  return (p.first == num);
+}

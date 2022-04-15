@@ -1,6 +1,6 @@
 #include "sic.h"
 
-SIC::SIC(int keep_num, int k, double beta, string db_place, int N) : MAX_KEEP_NUM(keep_num), k(k), beta(beta), N(N)
+SIC::SIC(int k, double beta, string db_place, int N, int print_time) : k(k), beta(beta), N(N), print_time(print_time)
 {
   available = vector<bool>(N, false);
   db.open(db_place, ios::in);
@@ -14,8 +14,12 @@ SIC::SIC(int keep_num, int k, double beta, string db_place, int N) : MAX_KEEP_NU
 void SIC::RealTimeInfluenceMaximization()
 {
   string line;
+  int cnt = 0;
+  // cout << 1 << endl;
   while(getline(db, line))
   {
+    cout << cnt << endl;
+    cnt++;
     vector<string> line_arg;
     boost::split(line_arg, line, boost::is_any_of(" "), boost::token_compress_on);
     int author = atoi(line_arg.at(0).c_str());
@@ -32,7 +36,7 @@ void SIC::RealTimeInfluenceMaximization()
         current_time = time;
       }
       available.erase(available.begin());
-      return;
+      continue;
     }
     //to check
     for(int i = 0; i < available.size(); ++i)
@@ -70,7 +74,7 @@ void SIC::RealTimeInfluenceMaximization()
       sievestream_list.erase(sievestream_list.begin()+1);
     }
 
-    if(current_time%100 == 0 && current_time != time)
+    if(current_time%print_time == 0 && current_time != time)
     {
       current_time = time;
       cout << "Current time: " << current_time << endl;
@@ -78,7 +82,7 @@ void SIC::RealTimeInfluenceMaximization()
       cout << "--------------------------------------------------------------------------------" << endl;
     }
 
-    return;
+    
   }
   
 }
