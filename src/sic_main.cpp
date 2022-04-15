@@ -3,9 +3,11 @@
 void run_with_parameter(Argument arg)
 {
 	cout << "--------------------------------------------------------------------------------" << endl;
-    cout << arg.dataset << " k=" << arg.k << " epsilon=" << arg.epsilon << endl;
+    cout << "dbplace: " << arg.dbplace << endl << "keepnum: " << arg.keepnum << endl
+    << " beta:" << arg.beta << endl << "k: " << arg.k << endl << "n: " << arg.n << endl;
 
-    // SIC::RealTimeInfluenceMaximization(arg);
+    SIC sic(arg.keepnum, arg.k, arg.beta, arg.dbplace, arg.n);
+    sic.RealTimeInfluenceMaximization();
 
 	Timer::show();
 }
@@ -17,17 +19,19 @@ void run(int argc, char **argv)
     {
         if(argv[i] == string("-help") || argv[i] == string("--help") || argc == 1)
         {
-            cout << "./sic -dataset *** -epsilon *** -k ***" << endl;
+            cout << "./sic -keepnum *** -beta *** -k *** -n *** -dbplace ***" << endl;
             return ;
         }
-        if(argv[i] == string("-dataset")) 
-            arg.dataset = argv[i + 1];
-        if(argv[i] == string("-epsilon")) 
-            arg.epsilon = atof(argv[i + 1]);
-        if(argv[i] == string("-T")) 
-            arg.T = atof(argv[i + 1]);
+        if(argv[i] == string("-keepnum")) 
+            arg.keepnum = atoi(argv[i + 1]);
+        if(argv[i] == string("-beta")) 
+            arg.beta = atof(argv[i + 1]);
         if(argv[i] == string("-k")) 
             arg.k = atoi(argv[i + 1]);
+        if(argv[i] == string("-n")) 
+            arg.n = atoi(argv[i + 1]);
+        if(argv[i] == string("-dbplace")) 
+            arg.dbplace = argv[i + 1];
     }
 	ASSERT(arg.dataset != "");
 	

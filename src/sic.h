@@ -1,7 +1,9 @@
 #pragma once
 
 #include "sievestream.h"
+#include <time.h>
 // #include "infgraph.h"
+#include "head.h"
 #include <sqlite3.h>
 #include <fstream>
 #include <boost/algorithm/string.hpp>
@@ -9,10 +11,11 @@
 class Argument
 {
 public:
+    int keepnum;
     int k;
-    string dataset;
-    double epsilon;
-    double T;
+    int n;
+    string dbplace;
+    double beta;
 };
 
 
@@ -35,5 +38,3 @@ public:
 	void RealTimeInfluenceMaximization();
 	SIC(int keep_num, int k, double beta, string db_place, int N);
 };
-
-int sic_callback1(void* void_sic, int argc, char** argv, char** azColName);
