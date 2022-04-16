@@ -3,6 +3,7 @@
 
 void SieveStream::Process(pair<int, int> action)
 {
+  //shabi,chongxie
   #if(DEBUG_TIME==1)
   clock_t start = clock();
   cout << "---------------------------------" << endl;
