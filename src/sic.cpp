@@ -1,5 +1,4 @@
 #include "sic.h"
-// #include <thread>
 #define SIC_DEBUG_TIME 0
 
 SIC::SIC(int k, double beta, string db_place, int N, int print_time) : k(k), beta(beta), N(N), print_time(print_time)
@@ -43,11 +42,13 @@ void SIC::RealTimeInfluenceMaximization()
       clock_t before = clock();
       clock_t now = clock();
       #endif
-      // vector<thread> thread_list;
+      vector<thread> thread_list;
+      // thread t1(callback, ref(sievestream_list.at(0)), pair<int, int>(parent_author, author));
       for(auto& j : sievestream_list)
       {
         //update each SieveStream oracle
-        j.Process(pair<int, int>(parent_author, author));
+        // j.Process(pair<int, int>(parent_author, author));
+        thread_list.emplace_back(thread(callback, ref(j), pair<int, int>(parent_author, author)));
         current_time = time;
         #if(SIC_DEBUG_TIME==2)
         now = clock();
@@ -55,6 +56,7 @@ void SIC::RealTimeInfluenceMaximization()
         before = now;
         #endif
       }
+      for(auto& i : thread_list) i.join();
       available.erase(available.begin());
       #if(SIC_DEBUG_TIME==1)
       clock_t process_time = clock();
@@ -64,10 +66,13 @@ void SIC::RealTimeInfluenceMaximization()
     }
     
     //to check
+    vector<thread> thread_list;
     for(int i = 0; i < available.size(); ++i)
     {
-      if(available.at(i)) sievestream_list.at(i).Process(pair<int, int>(parent_author, author)); 
+      // if(available.at(i)) sievestream_list.at(i).Process(pair<int, int>(parent_author, author)); 
+      if(available.at(i)) thread_list.emplace_back(thread(callback, ref(sievestream_list.at(i)), pair<int, int>(parent_author, author)));
     }
+    for(auto& i : thread_list) i.join();
     #if(SIC_DEBUG_TIME==1)
     clock_t process_time = clock();
     cout << "Process time: " << process_time - preprocess_time << endl;

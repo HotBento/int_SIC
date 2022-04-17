@@ -11,6 +11,8 @@
     "vector": "cpp",
     "initializer_list": "cpp",
     "ostream": "cpp",
-    "fstream": "cpp"
+    "fstream": "cpp",
+    "thread": "cpp",
+    "typeinfo": "cpp"
   }
 }
