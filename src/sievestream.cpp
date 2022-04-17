@@ -3,78 +3,47 @@
 
 void SieveStream::Process(pair<int, int> action)
 {
-  //shabi,chongxie
+  unprocessed_user_list.clear();
+  if(!user_list.contains(action.first)) 
+  {
+    user_list[action.first] = set<int>{action.first};
+    rr_user_list[action.first] = set<int>{action.first};
+  }
+  if(!user_list.contains(action.second))
+  {
+    user_list[action.second] = set<int>{action.second};
+    rr_user_list[action.second] = set<int>{action.second};
+  }
+
+  //update user_list
   #if(DEBUG_TIME==1)
   clock_t start = clock();
   cout << "---------------------------------" << endl;
   #endif
-  //update user_list
-  unprocessed_user_list.clear();
-  // auto iter_tmp0 = find(user_list.begin(), user_list.end(), action.first);
-  auto iter_tmp0 = find_if(user_list.begin(), user_list.end(), FinderFirst(action.first));
-  if(iter_tmp0 == user_list.end())
+  for(auto i : rr_user_list[action.first])
   {
-    vector<int> tmp;
-    tmp.push_back(action.first);
-    auto iter_tmp1 = find_if(user_list.begin(), user_list.end(), FinderFirst(action.second));
-    if(iter_tmp1 == user_list.end())
+    if(user_list[i].contains(action.second)) continue;
+    // user_list[i].merge(user_list[action.second]);
+    pair<int, set<int>> temp(i, set<int>());
+    for(auto j : user_list[action.second])
     {
-      tmp.push_back(action.second);
-      auto tmp_pair = pair<int, vector<int>>(action.second, vector<int>(1, action.second));
-      user_list.push_back(tmp_pair);
-      UnprocessedListAppend(tmp_pair);
-    }
-    else
-    {
-      for(auto i : (*iter_tmp1).second)
+      if(!user_list[i].contains(j))
       {
-        tmp.push_back(i);
+        user_list[i].insert(j);
+        temp.second.insert(j);
       }
     }
-    auto tmp_pair = pair<int, vector<int>>(action.first, tmp);
-    user_list.push_back(tmp_pair);
-    UnprocessedListAppend(tmp_pair);
-  }
-  else
-  {
-    if(find((*iter_tmp0).second.begin(), (*iter_tmp0).second.end(), action.second)==(*iter_tmp0).second.end())
-    {
-      (*iter_tmp0).second.push_back(action.second);
-      UnprocessedListAppend(*iter_tmp0);
-    }
-    auto iter_tmp1 = find_if(user_list.begin(), user_list.end(), FinderFirst(action.second));
-    if(iter_tmp1 == user_list.end())
-    {
-      auto tmp_pair = pair<int, vector<int>>(action.second, vector<int>(1, action.second));
-      user_list.push_back(tmp_pair);
-      UnprocessedListAppend(tmp_pair);
-    }
+    UnprocessedListAppend(temp);
   }
   #if(DEBUG_TIME==1)
   clock_t update_userlist_time = clock();
   cout << "Update userlist time: " << update_userlist_time - start << endl;
   #endif
   //update rr_user_list
-  bool is_first_in_rr = false;
-  bool is_second_in_rr = false;
-  for(pair<int, vector<int>>& i : rr_user_list)
+  for(auto i : user_list[action.second])
   {
-    if(i.first == action.first) is_first_in_rr = true;
-    else if(i.first == action.second) is_second_in_rr = true;
-    if(find(i.second.begin(), i.second.end(), action.second)!=i.second.end()
-    && find(i.second.begin(), i.second.end(), action.first)==i.second.end())
-    {
-      i.second.push_back(action.first);
-    }
-  }
-  if(!is_first_in_rr)
-  {
-    rr_user_list.push_back(pair<int, vector<int>>(action.first, vector<int>(1, action.first)));
-  }
-  if(!is_second_in_rr)
-  {
-    rr_user_list.push_back(pair<int, vector<int>>(action.second, vector<int>(1, action.second)));
-    rr_user_list.back().second.push_back(action.first);
+    if(rr_user_list[i].contains(action.first)) continue;
+    rr_user_list[i].merge(rr_user_list[action.first]);
   }
 
   #if(DEBUG_TIME==1)
@@ -111,28 +80,26 @@ void SieveStream::UpdateStream()
     {
       if(i.seed_set.size() == k) continue;
       int score = 0;
-      vector<int> add_list;
-      if(find(i.influence_set.begin(), i.influence_set.end(), unprocessed_user.first) == i.influence_set.end())
-      {
-        ++score;
-        add_list.push_back(unprocessed_user.first);
-      }
+      set<int> add_list;
+      if(i.influence_set.contains(unprocessed_user.first)) continue;
       for(auto& j : unprocessed_user.second)
       {
-        if(find(i.influence_set.begin(), i.influence_set.end(), j) == i.influence_set.end())
+        if(!i.influence_set.contains(j))
+        {
           ++score;
-          add_list.push_back(j);
+          add_list.insert(j);
+        }
       }
       if(score >= (i.opt/2-i.influence_set.size())/(k-i.seed_set.size()))
       {
-        i.seed_set.push_back(unprocessed_user.first);
-        i.influence_set.insert(i.influence_set.end(), add_list.begin(), add_list.end());
+        i.seed_set.insert(unprocessed_user.first);
+        i.influence_set.merge(add_list);
       }
     }
   }
-  vector<int> tmp_seed_set;
-  vector<int> tmp_influence_set;
-  for(auto i : instance_set)
+  set<int> tmp_seed_set;
+  set<int> tmp_influence_set;
+  for(auto& i : instance_set)
   {
     if(i.influence_set.size() > tmp_influence_set.size()
       || (i.influence_set.size() == tmp_influence_set.size() && i.seed_set.size() < tmp_seed_set.size()))
@@ -146,17 +113,13 @@ void SieveStream::UpdateStream()
   seed_influence_value = tmp_influence_set.size();
 }
 
-void SieveStream::UnprocessedListAppend(pair<int, vector<int>> unprocessed_user)
+void SieveStream::UnprocessedListAppend(pair<int, set<int>> unprocessed_user)
 {
-  if(find(seed_user.begin(), seed_user.end(), unprocessed_user.first) == seed_user.end())
-    unprocessed_user_list.push_back(unprocessed_user);
+  if(!seed_user.contains(unprocessed_user.first))
+    unprocessed_user_list.push_back(pair<int, set<int>>(unprocessed_user.first, user_list[unprocessed_user.first]));
   else
   {
-    for(auto i : unprocessed_user.second)
-    {
-      if(find(seed_influence_set.begin(), seed_influence_set.end(), i) == seed_influence_set.end())
-        seed_influence_set.push_back(i);
-    }
+    seed_influence_set.merge(unprocessed_user.second);
   }
 
   if(m < unprocessed_user.second.size()) m = unprocessed_user.second.size();
@@ -174,26 +137,19 @@ void SieveStream::PrintResult()
     cout << "Error: No seed set found." << endl;
     return;
   }
-  cout << "Seed set: \"" << seed_user.at(0) << "\"";
+  cout << "Seed set: ";
+  bool first_time = true;
   for(int i : seed_user)
   {
-    if(i == seed_user.at(0)) continue;
-    cout << ", \"" << i << "\"";
+    if(first_time) first_time = false;
+    else cout << ", ";
+    cout << "\"" << i << "\"";
   }
   cout << ";" << endl;
 }
 
-SieveStreamInstance::SieveStreamInstance(double opt, vector<int> seed_set, vector<int> influence_set):
+SieveStreamInstance::SieveStreamInstance(double opt, set<int> seed_set, set<int> influence_set):
   opt(opt), seed_set(seed_set), influence_set(influence_set)
 {
   
-}
-
-FinderFirst::FinderFirst(int num):num(num)
-{
-
-}
-bool FinderFirst::operator()(pair<int, vector<int>> p)
-{
-  return (p.first == num);
 }
