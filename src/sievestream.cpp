@@ -1,5 +1,5 @@
 #include "sievestream.h"
-#define DEBUG_TIME 0
+#define SIEVESTREAM_DEBUG_TIME 0
 
 void SieveStream::Process(pair<int, int> action)
 {
@@ -16,7 +16,7 @@ void SieveStream::Process(pair<int, int> action)
   }
 
   //update user_list
-  #if(DEBUG_TIME==1)
+  #if(SIEVESTREAM_DEBUG_TIME==1)
   clock_t start = clock();
   cout << "---------------------------------" << endl;
   #endif
@@ -35,7 +35,7 @@ void SieveStream::Process(pair<int, int> action)
     }
     UnprocessedListAppend(temp);
   }
-  #if(DEBUG_TIME==1)
+  #if(SIEVESTREAM_DEBUG_TIME==1)
   clock_t update_userlist_time = clock();
   cout << "Update userlist time: " << update_userlist_time - start << endl;
   #endif
@@ -46,14 +46,14 @@ void SieveStream::Process(pair<int, int> action)
     rr_user_list[i].merge(rr_user_list[action.first]);
   }
 
-  #if(DEBUG_TIME==1)
+  #if(SIEVESTREAM_DEBUG_TIME==1)
   clock_t update_rruserlist_time = clock();
   cout << "Update rruserlist time: " << update_rruserlist_time - update_userlist_time << endl;
   #endif
   
   UpdateStream();
 
-  #if(DEBUG_TIME==1)
+  #if(SIEVESTREAM_DEBUG_TIME==1)
   clock_t update_stream_time = clock();
   cout << "Update stream time: " << update_stream_time - update_rruserlist_time << endl;
   #endif

@@ -7,6 +7,7 @@
 // #include <sqlite3.h>
 #include <fstream>
 #include <boost/algorithm/string.hpp>
+#include <pthread.h>
 
 class Argument
 {
@@ -36,6 +37,9 @@ private:
     int print_time;
     ifstream db;
 public:
+    friend void callback(SieveStream* sievestream, pair<int, int> action);
 	void RealTimeInfluenceMaximization();
 	SIC(int k, double beta, string db_place, int N, int print_time);
 };
+
+void callback(SieveStream* sievestream, pair<int, int> action);
