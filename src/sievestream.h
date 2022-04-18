@@ -29,8 +29,8 @@ private:
   // vector<pair<int, int>> user;//<user_id, influence_value>
   double beta;
 
-  set<int> UpdateUserList(const int& user, set<int>to_appand, set<int>&unprocessed);
-  set<int> UpdateRRUserList(const int& user, set<int>to_appand, set<int>&unprocessed);
+  void UpdateUserList(const int& user, set<int>to_appand, set<int>&unprocessed);
+  void UpdateRRUserList(const int& user, set<int>to_appand, set<int>&unprocessed);
   void UnprocessedListAppend(pair<int, set<int>> unprocessed_user);
   void UpdateStream();
 
