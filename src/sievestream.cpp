@@ -119,14 +119,30 @@ void SieveStream::UpdateStream()
   unprocessed_user_list.clear();
 }
 
-set<int> UpdateUserList(int user, set<int>to_appand, set<int>unprocessed)
+set<int> SieveStream::UpdateUserList(const int& user, set<int>to_appand, set<int>&unprocessed)
 {
-  
+  for(set<int>::iterator i = to_appand.begin(); i != to_appand.end(); ++i)
+  {
+    if(!user_list[user].insert(*i).second) to_appand.erase(i);
+  }
+  unprocessed.erase(user);
+  for(int i : rr_user_list[user])
+  {
+    if(unprocessed.contains(i)) UpdateUserList(i, to_appand, unprocessed);
+  }
 }
 
-set<int> UpdateRRUserList(int user, set<int>to_appand, set<int>unprocessed)
+set<int> SieveStream::UpdateRRUserList(const int& user, set<int>to_appand, set<int>&unprocessed)
 {
-
+  for(set<int>::iterator i = to_appand.begin(); i != to_appand.end(); ++i)
+  {
+    if(!rr_user_list[user].insert(*i).second) to_appand.erase(i);
+  }
+  unprocessed.erase(user);
+  for(int i : user_list[user])
+  {
+    if(unprocessed.contains(i)) UpdateRRUserList(i, to_appand, unprocessed);
+  }
 }
 
 void SieveStream::UnprocessedListAppend(pair<int, set<int>> unprocessed_user)
