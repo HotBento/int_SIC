@@ -3,15 +3,18 @@
     {
       "type": "cppbuild",
       "label": "C/C++: g++ 生成活动文件",
-      "command": "/usr/bin/g++",
+      "command": "g++-10",
       "args": [
         "-fdiagnostics-color=always",
         "-g",
-        "${file}",
+        "/media/zhn/D/From_C/Documents/GraduationProject/IM-code/int_SIC/src/sic_main.cpp",
+        "/media/zhn/D/From_C/Documents/GraduationProject/IM-code/int_SIC/src/sic.cpp",
+        "/media/zhn/D/From_C/Documents/GraduationProject/IM-code/int_SIC/src/sievestream.cpp",
         "-l",
-        "sqlite3",
+        "pthread",
+        "-std=c++20",
         "-o",
-        "${fileDirname}/${fileBasenameNoExtension}"
+        "/media/zhn/D/From_C/Documents/GraduationProject/IM-code/int_SIC/src/sic"
       ],
       "options": {
         "cwd": "${fileDirname}"

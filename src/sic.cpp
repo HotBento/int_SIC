@@ -1,10 +1,10 @@
 #include "sic.h"
 #define SIC_DEBUG_TIME 0
 
-SIC::SIC(int k, double beta, string db_place, int N, int L) : k(k), beta(beta), N(N), L(L)
+SIC::SIC(int k, double beta, string db_place, int N, int L, int u) : k(k), beta(beta), N(N), L(L), U(u)
 {
   timer_on = false;
-  available = vector<bool>(N/L, false);
+  // available = vector<bool>(N/L, false);
   db.open(db_place, ios::in);
   if (!db.is_open())
 	{
@@ -18,13 +18,13 @@ void SIC::RealTimeInfluenceMaximization()
   string line;
   int cnt = 0;
   // cout << 1 << endl;
-  while(getline(db, line))
+  while(getline(db, line) && cnt != U)
   {
     #if(SIC_DEBUG_TIME==1)
     clock_t start = clock();
     cout << "---------------------------------" << endl;
     #endif
-    if(cnt%1000 == 0) cout << cnt << endl;
+    if(cnt%L == 0) cout << cnt << endl;
 
     // get and handle data
     vector<string> line_arg;
@@ -33,30 +33,35 @@ void SIC::RealTimeInfluenceMaximization()
     int parent_author = atoi(line_arg.at(1).c_str());
     int time = atoi(line_arg.at(2).c_str());
 
-    // window slide, part 1, append list
-    if(cnt%L == 0)
-    {
-      sievestream_list.push_back(SieveStream(k, beta));
-      available.push_back(true);
-    }
+    
     #if(SIC_DEBUG_TIME==1)
     clock_t preprocess_time = clock();
     cout << "Preprocess time: " << preprocess_time - start << endl;
     #endif
 
     // init part
-    if(available.at(0) == false)
+    // cout << available.size() << ", " << N/L << endl;
+    if(available.size() != N/L)
     {
       #if(SIC_DEBUG_TIME==2)
       clock_t before = clock();
       clock_t now = clock();
       #endif
+
+      // window slide, part 1, append list
+      if(cnt%L == 0)
+      {
+        // cout << available.size() << ", " << N/L << endl;
+        sievestream_list.push_back(SieveStream(k, beta));
+        available.push_back(true);
+      }
+
       //update each SieveStream oracle
       vector<thread> thread_list;
       for(auto& j : sievestream_list)
       {
         // j.Process(pair<int, int>(parent_author, author));
-        thread_list.emplace_back(thread(callback, ref(j), pair<int, int>(parent_author, author)));
+        thread_list.emplace_back(thread(callback, ref(j), pair<int, int>(parent_author, author), (cnt%L == 0)));
         #if(SIC_DEBUG_TIME==2)
         now = clock();
         cout << "Preprocess time: " << now - before << endl;
@@ -64,7 +69,40 @@ void SIC::RealTimeInfluenceMaximization()
         #endif
       }
       for(auto& i : thread_list) i.join();
-      if(cnt%L == 0) available.erase(available.begin());
+      if(cnt%L == 0)
+      {
+        // prune list
+        int end = available.size()-2;
+        while(end > 0 && available.at(end) == false) --end;
+        for(int i = 0; i < end; ++i)
+        {
+          if(available.at(i))
+          {
+            for(int j = i+1; j < end; ++j)
+            {
+              if(available.at(j) == false) continue;
+              int next_availale = j + 1;
+              while(available.at(next_availale) == false) ++next_availale;
+              if(sievestream_list.at(j).seed_influence_value >= (1-beta) * sievestream_list.at(i).seed_influence_value
+              && sievestream_list.at(next_availale).seed_influence_value >= (1-beta) * sievestream_list.at(i).seed_influence_value)
+              {
+                // cout << sievestream_list.at(i).seed_influence_value << ", " << sievestream_list.at(j).seed_influence_value << ", " << sievestream_list.at(next_availale).seed_influence_value << endl;
+                available[j] = false;
+              }
+              else break;
+            }
+          }
+        }
+        // cout << "Checkpoints num: " << count(available.begin(), available.end(), true) << endl;
+        // cout << available.size() << endl;
+        // for(bool i : available)
+        // {
+        //   cout << i << ", ";
+        // }
+        // cout << endl;
+      }
+      
+      // if(cnt%L == 0) available.erase(available.begin());
       ++cnt;
       #if(SIC_DEBUG_TIME==1)
       clock_t process_time = clock();
@@ -72,13 +110,22 @@ void SIC::RealTimeInfluenceMaximization()
       #endif
       continue;
     }
+
+    // cout << "successfully init" << endl;
+
+    // window slide, part 1, append list
+    if(cnt%L == 0)
+    {
+      sievestream_list.push_back(SieveStream(k, beta));
+      available.push_back(true);
+    }
     
     //update each SieveStream oracle
     vector<thread> thread_list;
     for(int i = 0; i < available.size(); ++i)
     {
       // if(available.at(i)) sievestream_list.at(i).Process(pair<int, int>(parent_author, author)); 
-      if(available.at(i)) thread_list.emplace_back(thread(callback, ref(sievestream_list.at(i)), pair<int, int>(parent_author, author)));
+      if(available.at(i)) thread_list.emplace_back(thread(callback, ref(sievestream_list.at(i)), pair<int, int>(parent_author, author), (cnt%L==0)));
     }
     for(auto& i : thread_list) i.join();
     #if(SIC_DEBUG_TIME==1)
@@ -97,6 +144,8 @@ void SIC::RealTimeInfluenceMaximization()
         cout << "Throughput: " << L * CLOCKS_PER_SEC * 0.001 / (temp - timer) << "K/s" << endl;
       }
       timer = clock();
+
+      // prune list
       int end = available.size()-2;
       while(available.at(end) == false) --end;
       for(int i = 0; i < end; ++i)
@@ -117,6 +166,8 @@ void SIC::RealTimeInfluenceMaximization()
           }
         }
       }
+
+      // delete element
       if(available.at(1))
       {
         available.erase(available.begin());
@@ -127,24 +178,39 @@ void SIC::RealTimeInfluenceMaximization()
         available.erase(available.begin()+1);
         sievestream_list.erase(sievestream_list.begin()+1);
       }
+      int result_indx = 0;
+      for(int i = 1; i < N/L; ++i)
+      {
+        if(available[i])
+        {
+          result_indx = i;
+          break;
+        }
+      }
+      // for(bool i : available)
+      // {
+      //   cout << i << ", ";
+      // }
       #if(SIC_DEBUG_TIME==1)
       clock_t afterprocess_time = clock();
       cout << "After_process time: " << afterprocess_time - process_time << endl;
       #endif
 
       // print result
+      cout << "Checkpoints num: " << count(available.begin(), available.end(), true) << endl;
       cout << "Current data time: " << time << endl;
-      sievestream_list[0].PrintResult();
+      sievestream_list[result_indx].PrintResult();
       cout << "--------------------------------------------------------------------------------" << endl;
 
-      cnt = 0;
+      // cnt = 0;
     }
     ++cnt;
   }
+  cout << "successfully ended" << endl;
   
 }
 
-void callback(SieveStream& sievestream, pair<int, int> action)
+void callback(SieveStream& sievestream, pair<int, int> action, bool if_update)
 {
-  sievestream.Process(action);
+  sievestream.Process(action, if_update);
 }

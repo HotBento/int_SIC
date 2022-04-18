@@ -15,6 +15,7 @@ public:
     int k;
     int n;
     int l;
+    int u;
     string dbplace;
     double beta;
 };
@@ -31,18 +32,16 @@ private:
     int MAX_KEEP_NUM;
     int k;//max size of seedset
     int N;//max keep number of checkpoints
-    int L;
+    int L;//data num for each window slide
+    int U;//max data num
     bool timer_on;
     clock_t timer;
     double beta;
-    // const double approximation;
-    // int current_time;
-    // int print_time;
     ifstream db;
 public:
-    friend void callback(SieveStream& sievestream, pair<int, int> action);
+    friend void callback(SieveStream& sievestream, pair<int, int> action, bool if_update);
 	void RealTimeInfluenceMaximization();
-	SIC(int k, double beta, string db_place, int N, int L);
+	SIC(int k, double beta, string db_place, int N, int L, int u);
 };
 
-void callback(SieveStream& sievestream, pair<int, int> action);
+void callback(SieveStream& sievestream, pair<int, int> action, bool if_update);

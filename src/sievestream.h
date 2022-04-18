@@ -18,7 +18,7 @@ private:
   // vector<int> seed_influence_set;
   map<int, set<int>> user_list;//include user
   map<int, set<int>> rr_user_list;
-  vector<pair<int, set<int>>> unprocessed_user_list;
+  map<int, set<int>> unprocessed_user_list;
   set<int> seed_user;
   set<int> seed_influence_set;
   // int max_cardinality;
@@ -33,7 +33,7 @@ private:
 public:
   int seed_influence_value;
   //action.first influences action.second
-  void Process(pair<int, int> action);
+  void Process(pair<int, int> action, bool if_update);
   void PrintResult();
 
   SieveStream(int k, double beta);
