@@ -31,15 +31,18 @@ private:
     int MAX_KEEP_NUM;
     int k;//max size of seedset
     int N;//max keep number of checkpoints
+    int L;
+    bool timer_on;
+    clock_t timer;
     double beta;
     // const double approximation;
-    int current_time;
-    int print_time;
+    // int current_time;
+    // int print_time;
     ifstream db;
 public:
     friend void callback(SieveStream& sievestream, pair<int, int> action);
 	void RealTimeInfluenceMaximization();
-	SIC(int k, double beta, string db_place, int N, int print_time);
+	SIC(int k, double beta, string db_place, int N, int L);
 };
 
 void callback(SieveStream& sievestream, pair<int, int> action);
