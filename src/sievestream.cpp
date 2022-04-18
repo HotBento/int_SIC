@@ -118,7 +118,7 @@ void SieveStream::UpdateStream()
 void SieveStream::UnprocessedListAppend(pair<int, set<int>> unprocessed_user)
 {
   if(!seed_user.contains(unprocessed_user.first))
-    unprocessed_user_list[unprocessed_user.first].merge(unprocessed_user.second);
+    unprocessed_user_list[unprocessed_user.first] = user_list[unprocessed_user.first];
   else
   {
     seed_influence_set.merge(unprocessed_user.second);
