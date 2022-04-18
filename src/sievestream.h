@@ -18,6 +18,8 @@ private:
   // vector<int> seed_influence_set;
   map<int, set<int>> user_list;//include user
   map<int, set<int>> rr_user_list;
+  map<int, set<int>> user_single_list;
+  map<int, set<int>> rr_user_single_list;
   map<int, set<int>> unprocessed_user_list;
   set<int> seed_user;
   set<int> seed_influence_set;
@@ -27,6 +29,8 @@ private:
   // vector<pair<int, int>> user;//<user_id, influence_value>
   double beta;
 
+  set<int> UpdateUserList(int user, set<int>to_appand, set<int>unprocessed);
+  set<int> UpdateRRUserList(int user, set<int>to_appand, set<int>unprocessed);
   void UnprocessedListAppend(pair<int, set<int>> unprocessed_user);
   void UpdateStream();
 

@@ -8,12 +8,16 @@ void SieveStream::Process(pair<int, int> action, bool if_update)
   {
     user_list[action.first] = set<int>{action.first};
     rr_user_list[action.first] = set<int>{action.first};
+    user_single_list[action.first] = set<int>{action.second};
   }
+  else user_single_list[action.first].insert(action.second);
   if(!user_list.contains(action.second))
   {
     user_list[action.second] = set<int>{action.second};
     rr_user_list[action.second] = set<int>{action.second};
+    rr_user_single_list[action.second] = set<int>{action.first};
   }
+  else rr_user_single_list[action.second].insert(action.first);
 
   //update user_list
   #if(SIEVESTREAM_DEBUG_TIME==1)
@@ -113,6 +117,16 @@ void SieveStream::UpdateStream()
   seed_influence_value = tmp_influence_set.size();
 
   unprocessed_user_list.clear();
+}
+
+set<int> UpdateUserList(int user, set<int>to_appand, set<int>unprocessed)
+{
+  
+}
+
+set<int> UpdateRRUserList(int user, set<int>to_appand, set<int>unprocessed)
+{
+
 }
 
 void SieveStream::UnprocessedListAppend(pair<int, set<int>> unprocessed_user)
