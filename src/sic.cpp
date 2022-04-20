@@ -57,6 +57,7 @@ void SIC::RealTimeInfluenceMaximization()
       }
 
       //update each SieveStream oracle
+      // cout << "Update" << cnt << endl;
       vector<thread> thread_list;
       for(auto& j : sievestream_list)
       {

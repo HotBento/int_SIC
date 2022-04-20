@@ -8,9 +8,9 @@ void SieveStream::Process(pair<int, int> action, bool if_update)
   {
     user_list[action.first] = set<int>{action.first};
     rr_user_list[action.first] = set<int>{action.first};
-    user_single_list[action.first] = set<int>{action.second};
+    // user_single_list[action.first] = set<int>{action.second};
   }
-  else user_single_list[action.first].insert(action.second);
+  // else user_single_list[action.first].insert(action.second);
   if(!user_list.contains(action.second))
   {
     user_list[action.second] = set<int>{action.second};
@@ -26,7 +26,8 @@ void SieveStream::Process(pair<int, int> action, bool if_update)
   #endif
 
   set<int> temp = rr_user_list[action.first];
-  UpdateUserList(action.first, user_list[action.second], temp);
+  vector<int> users(1, action.first);
+  UpdateUserList(users, user_list[action.second], temp);
 
   // for(auto i : rr_user_list[action.first])
   // {
@@ -49,8 +50,8 @@ void SieveStream::Process(pair<int, int> action, bool if_update)
   #endif
   //update rr_user_list
 
-  temp = user_list[action.second];
-  UpdateRRUserList(action.second, rr_user_list[action.first], temp);
+  // temp = user_list[action.second];
+  // UpdateRRUserList(action.second, rr_user_list[action.first], temp);
 
   // for(auto i : user_list[action.second])
   // {
@@ -127,46 +128,93 @@ void SieveStream::UpdateStream()
   unprocessed_user_list.clear();
 }
 
-void SieveStream::UpdateUserList(const int& user, set<int>to_appand, set<int>&unprocessed)
+void SieveStream::UpdateUserList(vector<int> users, set<int>to_append, set<int>&unprocessed)
 {
-  pair<int, set<int>> temp(user, set<int>());
-  for(set<int>::iterator i = to_appand.begin(); i != to_appand.end(); ++i)
+  // #if(SIEVESTREAM_DEBUG_TIME==2)
+  // clock_t start = clock();
+  // cout << "---------------------------------" << endl;
+  // #endif
+  // pair<int, set<int>> temp(user, set<int>());
+  // // for(set<int>::iterator i = to_append.begin(); i != to_append.end(); ++i)
+  // // {
+  // //   if(!user_list[user].insert(*i).second)
+  // //   {
+  // //     to_append.erase(i);
+  // //   }
+  // //   else temp.second.insert(*i);
+  // // }
+  // set<int>::iterator set_iter = to_append.begin();
+  // while (set_iter != to_append.end())
+  // {
+  //   if(!user_list[user].insert(*set_iter).second)
+  //   {
+  //     set<int>::iterator temp_iter = set_iter;
+  //     ++set_iter;
+  //     to_append.erase(temp_iter);
+  //   }
+  //   else
+  //   {
+  //     rr_user_list[*set_iter].insert(user);
+  //     temp.second.insert(*set_iter);
+  //     ++set_iter;
+  //   }
+  // }
+  // #if(SIEVESTREAM_DEBUG_TIME==2)
+  // clock_t update_userlist_time = clock();
+  // cout << "Update userlist time: " << update_userlist_time - start << endl;
+  // #endif
+  // UnprocessedListAppend(temp);
+  // unprocessed.erase(user);
+  // #if(SIEVESTREAM_DEBUG_TIME==2)
+  // clock_t process_append_list_time = clock();
+  // cout << "Process time: " << process_append_list_time - update_userlist_time << endl;
+  // for(int i : rr_user_single_list[user])
+  // {
+  //   if(unprocessed.contains(i));
+  // }
+  // clock_t check_time = clock();
+  // cout << "check time: " << check_time - process_append_list_time << endl;
+  // #endif
+  // for(int i : rr_user_single_list[user])
+  // {
+  //   if(unprocessed.contains(i)) UpdateUserList(i, to_append, unprocessed);
+  // }
+
+  while(unprocessed.size())
   {
-    if(!user_list[user].insert(*i).second) to_appand.erase(i);
-    else temp.second.insert(*i);
-  }
-  UnprocessedListAppend(temp);
-  unprocessed.erase(user);
-  for(int i : rr_user_list[user])
-  {
-    if(unprocessed.contains(i)) UpdateUserList(i, to_appand, unprocessed);
+
   }
 }
 
-void SieveStream::UpdateRRUserList(const int& user, set<int>to_appand, set<int>&unprocessed)
-{
-  for(set<int>::iterator i = to_appand.begin(); i != to_appand.end(); ++i)
-  {
-    if(!rr_user_list[user].insert(*i).second) to_appand.erase(i);
-  }
-  unprocessed.erase(user);
-  for(int i : user_list[user])
-  {
-    if(unprocessed.contains(i)) UpdateRRUserList(i, to_appand, unprocessed);
-  }
-}
+// void SieveStream::UpdateRRUserList(const int& user, set<int>to_append, set<int>&unprocessed)
+// {
+//   // for(set<int>::iterator i = to_append.begin(); i != to_append.end(); ++i)
+//   // {
+//   //   if(!rr_user_list[user].insert(*i).second) to_append.erase(i);
+//   // }
+//   set<int>::iterator set_iter = to_append.begin();
+//   while (set_iter != to_append.end())
+//   {
+//     if(!rr_user_list[user].insert(*set_iter).second)
+//     {
+//       set<int>::iterator temp_iter = set_iter;
+//       ++set_iter;
+//       to_append.erase(temp_iter);
+//     }
+//     else
+//     {
+//       // temp.second.insert(*set_iter);
+//       ++set_iter;
+//     }
+//   }
+//   unprocessed.erase(user);
+//   for(int i : user_single_list[user])
+//   {
+//     if(unprocessed.contains(i)) UpdateRRUserList(i, to_append, unprocessed);
+//   }
+// }
 
-void SieveStream::UnprocessedListAppend(pair<int, set<int>> unprocessed_user)
-{
-  if(!seed_user.contains(unprocessed_user.first))
-    unprocessed_user_list[unprocessed_user.first] = user_list[unprocessed_user.first];
-  else
-  {
-    seed_influence_set.merge(unprocessed_user.second);
-  }
 
-  if(m < user_list[unprocessed_user.first].size()) m = user_list[unprocessed_user.first].size();
-}
 
 SieveStream::SieveStream(int k, double beta): k(k), seed_influence_value(0), m(0), beta(beta)
 {
