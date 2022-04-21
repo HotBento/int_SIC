@@ -29,10 +29,13 @@ private:
   // vector<pair<int, int>> user;//<user_id, influence_value>
   double beta;
 
-  void UpdateUserList(vector<int> user, set<int>to_append, set<int>&unprocessed);
+  void UpdateUserList(vector<pair<int, set<int>>>& users, set<int>& unprocessed);
   // void UpdateRRUserList(const int& user, set<int>to_append, set<int>&unprocessed);
   void UnprocessedListAppend(pair<int, set<int>> unprocessed_user);
+  void UpdateUserList(int user, set<int> to_append, set<int>& unprocessed);
   void UpdateStream();
+
+  int debug_cnt;
 
 public:
   int seed_influence_value;
