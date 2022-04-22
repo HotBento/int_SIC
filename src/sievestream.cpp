@@ -1,73 +1,78 @@
 #include "sievestream.h"
-#define SIEVESTREAM_DEBUG_TIME 0
+
 
 void SieveStream::Process(pair<int, int> action, bool if_update)
 {
   if(!user_list.contains(action.first)) 
   {
-    user_list[action.first] = set<int>{action.first};
-    rr_user_list[action.first] = set<int>{action.first};
+    user_list[action.first] = unordered_set<int>{action.first};
+    // user_list[action.first].max_load_factor(0.5);
+    rr_user_list[action.first] = unordered_set<int>{action.first};
+    // rr_user_list[action.first].max_load_factor(0.5);
   }
   if(!user_list.contains(action.second))
   {
-    user_list[action.second] = set<int>{action.second};
-    rr_user_list[action.second] = set<int>{action.second};
-    rr_user_single_list[action.second] = set<int>{action.first};
+    user_list[action.second] = unordered_set<int>{action.second};
+    // user_list[action.second].max_load_factor(0.5);
+    rr_user_list[action.second] = unordered_set<int>{action.second};
+    // rr_user_list[action.second].max_load_factor(0.5);
+    rr_user_single_list[action.second] = unordered_set<int>{action.first};
+    // rr_user_single_list[action.second].max_load_factor(0.5);
   }
   else rr_user_single_list[action.second].insert(action.first);
 
   //update user_list
   #if(SIEVESTREAM_DEBUG_TIME==1)
+  if(action.second == 63143)
+  {
+    cout << action.first << endl;
+  }
+  cout << "RR num: " << rr_user_list[action.first].size() << endl;
   clock_t start = clock();
   cout << "---------------------------------" << endl;
   #endif
 
-  set<int> temp = rr_user_list[action.first];
-  vector<pair<int, set<int>>> users(1, pair<int, set<int>>(action.first, user_list[action.second]));
-  // UpdateUserList(users, temp);
+  unordered_set<int> temp = rr_user_list[action.first];
+  vector<pair<int, unordered_set<int>>> users(1, pair<int, unordered_set<int>>(action.first, user_list[action.second]));
+  UpdateUserList(users, temp);
   // UpdateUserList(action.first, user_list[action.second], temp);
 
-  for(auto i : rr_user_list[action.first])
-  {
-    #if(SIEVESTREAM_DEBUG_TIME==2)
-    clock_t start = clock();
-    cout << "---------------------------------" << endl;
-    #endif
-    if(user_list[i].contains(action.second)) continue;
-    pair<int, set<int>> temp(i, set<int>());
-    for(auto j : user_list[action.second])
-    {
-      if(user_list[i].insert(j).second)
-      {
-        rr_user_list[j].insert(i);
-        temp.second.insert(j);
-      }
-    }
-    #if(SIEVESTREAM_DEBUG_TIME==2)
-    clock_t update_userlist_time = clock();
-    cout << "Update userlist time: " << update_userlist_time - start << endl;
-    #endif
-    UnprocessedListAppend(temp);
-    #if(SIEVESTREAM_DEBUG_TIME==2)
-    clock_t process_append_list_time = clock();
-    cout << "Process time: " << process_append_list_time - update_userlist_time << endl;
-    #endif
-  }
+  // for(auto i : rr_user_list[action.first])
+  // {
+  //   #if(SIEVESTREAM_DEBUG_TIME==2)
+  //   clock_t start = clock();
+  //   cout << "---------------------------------" << endl;
+  //   #endif
+  //   if(user_list[i].contains(action.second)) continue;
+  //   pair<int, unordered_set<int>> temp(i, unordered_set<int>());
+  //   for(auto j : user_list[action.second])
+  //   {
+  //     if(user_list[i].insert(j).second)
+  //     {
+  //       rr_user_list[j].insert(i);
+  //       temp.second.insert(j);
+  //     }
+  //   }
+  //   #if(SIEVESTREAM_DEBUG_TIME==2)
+  //   clock_t update_userlist_time = clock();
+  //   cout << "Update userlist time: " << update_userlist_time - start << endl;
+  //   #endif
+  //   UnprocessedListAppend(temp);
+  //   #if(SIEVESTREAM_DEBUG_TIME==2)
+  //   clock_t process_append_list_time = clock();
+  //   cout << "Process time: " << process_append_list_time - update_userlist_time << endl;
+  //   #endif
+  // }
   #if(SIEVESTREAM_DEBUG_TIME==1)
   clock_t update_userlist_time = clock();
   cout << "Update userlist time: " << update_userlist_time - start << endl;
-  #endif
-
-  #if(SIEVESTREAM_DEBUG_TIME==1)
-  clock_t update_rruserlist_time = clock();
-  cout << "Update rruserlist time: " << update_rruserlist_time - update_userlist_time << endl;
   #endif
   
   if(if_update) UpdateStream();
 
   #if(SIEVESTREAM_DEBUG_TIME==1)
   clock_t update_stream_time = clock();
-  cout << "Update stream time: " << update_stream_time - update_rruserlist_time << endl;
+  cout << "Update stream time: " << update_stream_time - update_userlist_time << endl;
   #endif
 
 }
@@ -85,16 +90,26 @@ void SieveStream::UpdateStream()
     opt *= 1 + beta;
   }
   
-  for(auto unprocessed_user : unprocessed_user_list)
+  for(auto& unprocessed_user : unprocessed_user_list)
   {
     // if(seed_user.size() == k) return;
+    bool flag = false;
+    for(auto& i : rr_user_list[unprocessed_user.first])
+    {
+      if(!user_list[unprocessed_user.first].contains(i))
+      {
+        flag = true;
+        break;
+      }
+    }
+    if(flag) continue;
     for(auto& i : instance_set)
     {
       if(i.seed_set.size() == k) continue;
       int score = 0;
-      set<int> add_list;
+      unordered_set<int> add_list;
       if(i.influence_set.contains(unprocessed_user.first)) continue;
-      for(auto& j : unprocessed_user.second)
+      for(auto& j : *(unprocessed_user.second))
       {
         if(!i.influence_set.contains(j))
         {
@@ -109,8 +124,8 @@ void SieveStream::UpdateStream()
       }
     }
   }
-  set<int> tmp_seed_set;
-  set<int> tmp_influence_set;
+  unordered_set<int> tmp_seed_set;
+  unordered_set<int> tmp_influence_set;
   for(auto& i : instance_set)
   {
     if(i.influence_set.size() > tmp_influence_set.size()
@@ -127,9 +142,9 @@ void SieveStream::UpdateStream()
   unprocessed_user_list.clear();
 }
 
-void SieveStream::UpdateUserList(vector<pair<int, set<int>>>& users, set<int>& unprocessed)
+void SieveStream::UpdateUserList(vector<pair<int, unordered_set<int>>>& users, unordered_set<int>& unprocessed)
 {
-  pair<int, set<int>> append_temp;
+  pair<int, unordered_set<int>> append_temp;
   while(unprocessed.size())
   {
     #if(SIEVESTREAM_DEBUG_TIME==2)
@@ -142,16 +157,16 @@ void SieveStream::UpdateUserList(vector<pair<int, set<int>>>& users, set<int>& u
       continue;
     }
     int user = users.back().first;
-    set<int> to_append = users.back().second;
+    unordered_set<int> to_append = users.back().second;
     users.pop_back();
     append_temp.first = user;
     append_temp.second.clear();
-    set<int>::iterator set_iter = to_append.begin();
+    unordered_set<int>::iterator set_iter = to_append.begin();
     while (set_iter != to_append.end())
     {
       if(!user_list[user].insert(*set_iter).second)
       {
-        set<int>::iterator temp_iter = set_iter;
+        unordered_set<int>::iterator temp_iter = set_iter;
         ++set_iter;
         to_append.erase(temp_iter);
       }
@@ -174,7 +189,7 @@ void SieveStream::UpdateUserList(vector<pair<int, set<int>>>& users, set<int>& u
     #endif
     for(int i : rr_user_single_list[user])
     {
-      users.push_back(pair<int, set<int>>(i, to_append));
+      users.push_back(pair<int, unordered_set<int>>(i, to_append));
     }
     #if(SIEVESTREAM_DEBUG_TIME==2)
     clock_t push_time = clock();
@@ -183,19 +198,19 @@ void SieveStream::UpdateUserList(vector<pair<int, set<int>>>& users, set<int>& u
   }
 }
 
-void SieveStream::UpdateUserList(int user, set<int> to_append, set<int>& unprocessed)
+void SieveStream::UpdateUserList(int user, unordered_set<int> to_append, unordered_set<int>& unprocessed)
 {
   #if(SIEVESTREAM_DEBUG_TIME==2)
   clock_t start = clock();
   cout << "---------------------------------" << endl;
   #endif
-  pair<int, set<int>> temp(user, set<int>());
-  set<int>::iterator set_iter = to_append.begin();
+  pair<int, unordered_set<int>> temp(user, unordered_set<int>());
+  unordered_set<int>::iterator set_iter = to_append.begin();
   while (set_iter != to_append.end())
   {
     if(!user_list[user].insert(*set_iter).second)
     {
-      set<int>::iterator temp_iter = set_iter;
+      unordered_set<int>::iterator temp_iter = set_iter;
       ++set_iter;
       to_append.erase(temp_iter);
     }
@@ -252,7 +267,7 @@ void SieveStream::PrintResult()
   cout << ";" << endl;
 }
 
-SieveStreamInstance::SieveStreamInstance(double opt, set<int> seed_set, set<int> influence_set):
+SieveStreamInstance::SieveStreamInstance(double opt, unordered_set<int> seed_set, unordered_set<int> influence_set):
   opt(opt), seed_set(seed_set), influence_set(influence_set)
 {
   
