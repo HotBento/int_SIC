@@ -6,8 +6,9 @@
 #include <unordered_map>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include <algorithm>
-#include <time.h>
+#include <ctime>
 using namespace std;
 #define SIEVESTREAM_DEBUG_TIME 2
 
@@ -45,6 +46,7 @@ public:
   // action.first influences action.second
   void Process(pair<int, int> action, bool if_update);
   void PrintResult();
+  void PrintResult(ofstream& log);
 
   SieveStream(int k, double beta);
 };

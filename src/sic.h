@@ -1,7 +1,7 @@
 #pragma once
 
 #include "sievestream.h"
-#include <time.h>
+#include <ctime>
 // #include "infgraph.h"
 
 // #include <sqlite3.h>
@@ -17,6 +17,7 @@ public:
     int l;
     int u;
     string dbplace;
+    string logplace;
     double beta;
 };
 
@@ -38,10 +39,11 @@ private:
     clock_t timer;
     double beta;
     ifstream db;
+    ofstream log_file;
 public:
     friend void callback(SieveStream& sievestream, pair<int, int> action, bool if_update);
 	void RealTimeInfluenceMaximization();
-	SIC(int k, double beta, string db_place, int N, int L, int u);
+	SIC(int k, double beta, string db_place, int N, int L, int u, string logplace);
 };
 
 void callback(SieveStream& sievestream, pair<int, int> action, bool if_update);

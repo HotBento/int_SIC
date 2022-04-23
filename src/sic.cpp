@@ -1,14 +1,28 @@
 #include "sic.h"
 #define SIC_DEBUG_TIME 0
 
-SIC::SIC(int k, double beta, string db_place, int N, int L, int u) : k(k), beta(beta), N(N), L(L), U(u)
+SIC::SIC(int k, double beta, string db_place, int N, int L, int u, string logplace) : k(k), beta(beta), N(N), L(L), U(u)
 {
   timer_on = false;
-  // available = vector<bool>(N/L, false);
+  // create log file
+  int slash_place = db_place.rfind("/");
+  int point_place = db_place.rfind(".");
+  string db_type = db_place.substr(slash_place+1, point_place-slash_place-1);
+  time_t now = time(0);
+  tm *ltm = localtime(&now);
+  logplace = logplace + "/" + db_type + to_string(ltm->tm_year+1900) + "_" + to_string(ltm->tm_mon+1) + "_"
+  + to_string(ltm->tm_mday) + "_" + to_string(ltm->tm_hour) + "_" + to_string(ltm->tm_min) + ".txt";
+  log_file.open(logplace, ios::out);
+  if (!log_file.is_open())
+	{
+		cout << "log文件打开失败" << endl;
+		exit(0);
+	}
+  // open database
   db.open(db_place, ios::in);
   if (!db.is_open())
 	{
-		cout << "文件打开失败" << endl;
+		cout << "db文件打开失败" << endl;
 		exit(0);
 	}
 }
@@ -17,7 +31,6 @@ void SIC::RealTimeInfluenceMaximization()
 {
   string line;
   int cnt = 0;
-  // cout << 1 << endl;
   while(getline(db, line) && cnt != U)
   {
     #if(SIC_DEBUG_TIME==1)
@@ -103,7 +116,6 @@ void SIC::RealTimeInfluenceMaximization()
         // cout << endl;
       }
       
-      // if(cnt%L == 0) available.erase(available.begin());
       ++cnt;
       #if(SIC_DEBUG_TIME==1)
       clock_t process_time = clock();
@@ -200,6 +212,8 @@ void SIC::RealTimeInfluenceMaximization()
       // print result
       cout << "Checkpoints num: " << count(available.begin(), available.end(), true) << endl;
       cout << "Current data time: " << time << endl;
+      log_file << "Checkpoints num: " << count(available.begin(), available.end(), true) << endl;
+      log_file << "Current data time: " << time << endl;
       sievestream_list[result_indx].PrintResult();
       cout << "--------------------------------------------------------------------------------" << endl;
 

@@ -7,7 +7,7 @@ void run_with_parameter(Argument arg)
     cout << "dbplace: " << arg.dbplace << endl << " beta:" << arg.beta << endl
     << "k: " << arg.k << endl << "n: " << arg.n << endl << "u: " << arg.u << endl;
 
-    SIC sic(arg.k, arg.beta, arg.dbplace, arg.n, arg.l, arg.u);
+    SIC sic(arg.k, arg.beta, arg.dbplace, arg.n, arg.l, arg.u, arg.logplace);
     sic.RealTimeInfluenceMaximization();
 
 	Timer::show();
@@ -20,7 +20,7 @@ void run(int argc, char **argv)
     {
         if(argv[i] == string("-help") || argv[i] == string("--help") || argc == 1)
         {
-            cout << "./sic -u *** -beta *** -k *** -n *** -l *** -dbplace ***" << endl;
+            cout << "./sic -u *** -beta *** -k *** -n *** -l *** -dbplace *** -logplace ***" << endl;
             return ;
         }
         if(argv[i] == string("-u")) 
@@ -35,6 +35,8 @@ void run(int argc, char **argv)
             arg.n = atoi(argv[i + 1]);
         if(argv[i] == string("-dbplace")) 
             arg.dbplace = argv[i + 1];
+        if(argv[i] == string("-logplace")) 
+            arg.logplace = argv[i + 1];
     }
 	ASSERT(arg.dataset != "");
 	

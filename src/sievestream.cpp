@@ -267,6 +267,34 @@ void SieveStream::PrintResult()
   cout << ";" << endl;
 }
 
+void SieveStream::PrintResult(ofstream& log)
+{
+  if(seed_user.size() == 0)
+  {
+    cout << "Error: No seed set found." << endl;
+    log << "Error: No seed set found." << endl;
+    return;
+  }
+  cout << "Influence spread: " << seed_influence_value << endl;
+  cout << "Seed set: ";
+  log << "Influence spread: " << seed_influence_value << endl;
+  log << "Seed set: ";
+  bool first_time = true;
+  for(int i : seed_user)
+  {
+    if(first_time) first_time = false;
+    else
+    {
+      cout << ", ";
+      log << ", ";
+    }
+    cout << "\"" << i << "\"";
+    log << "\"" << i << "\"";
+  }
+  cout << ";" << endl;
+  log << ";" << endl;
+}
+
 SieveStreamInstance::SieveStreamInstance(double opt, unordered_set<int> seed_set, unordered_set<int> influence_set):
   opt(opt), seed_set(seed_set), influence_set(influence_set)
 {
