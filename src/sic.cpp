@@ -214,7 +214,7 @@ void SIC::RealTimeInfluenceMaximization()
       cout << "Current data time: " << time << endl;
       log_file << "Checkpoints num: " << count(available.begin(), available.end(), true) << endl;
       log_file << "Current data time: " << time << endl;
-      sievestream_list[result_indx].PrintResult();
+      sievestream_list[result_indx].PrintResult(log_file);
       cout << "--------------------------------------------------------------------------------" << endl;
 
       // cnt = 0;
