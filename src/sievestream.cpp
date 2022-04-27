@@ -6,18 +6,18 @@ void SieveStream::Process(pair<int, int> action, bool if_update)
   if(!user_list.contains(action.first)) 
   {
     user_list[action.first] = unordered_set<int>{action.first};
-    // user_list[action.first].max_load_factor(0.5);
+    user_list[action.first].max_load_factor(10);
     rr_user_list[action.first] = unordered_set<int>{action.first};
-    // rr_user_list[action.first].max_load_factor(0.5);
+    rr_user_list[action.first].max_load_factor(10);
   }
   if(!user_list.contains(action.second))
   {
     user_list[action.second] = unordered_set<int>{action.second};
-    // user_list[action.second].max_load_factor(0.5);
+    user_list[action.second].max_load_factor(10);
     rr_user_list[action.second] = unordered_set<int>{action.second};
-    // rr_user_list[action.second].max_load_factor(0.5);
+    rr_user_list[action.second].max_load_factor(10);
     rr_user_single_list[action.second] = unordered_set<int>{action.first};
-    // rr_user_single_list[action.second].max_load_factor(0.5);
+    rr_user_single_list[action.second].max_load_factor(10);
   }
   else rr_user_single_list[action.second].insert(action.first);
 

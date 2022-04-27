@@ -10,7 +10,7 @@
 #include <algorithm>
 #include <ctime>
 using namespace std;
-#define SIEVESTREAM_DEBUG_TIME 2
+#define SIEVESTREAM_DEBUG_TIME 0
 
 class SieveStream
 {

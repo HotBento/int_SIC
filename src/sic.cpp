@@ -155,6 +155,8 @@ void SIC::RealTimeInfluenceMaximization()
         clock_t temp = clock();
         cout << "Time cost: " << 1000.0 * (temp - timer) / CLOCKS_PER_SEC << "ms" << endl;
         cout << "Throughput: " << L * CLOCKS_PER_SEC * 0.001 / (temp - timer) << "K/s" << endl;
+        log_file << "Time cost: " << 1000.0 * (temp - timer) / CLOCKS_PER_SEC << "ms" << endl;
+        log_file << "Throughput: " << L * CLOCKS_PER_SEC * 0.001 / (temp - timer) << "K/s" << endl;
       }
       timer = clock();
 
@@ -200,10 +202,11 @@ void SIC::RealTimeInfluenceMaximization()
           break;
         }
       }
-      // for(bool i : available)
-      // {
-      //   cout << i << ", ";
-      // }
+      for(bool i : available)
+      {
+        cout << i << ", ";
+      }
+      cout << endl;
       #if(SIC_DEBUG_TIME==1)
       clock_t afterprocess_time = clock();
       cout << "After_process time: " << afterprocess_time - process_time << endl;

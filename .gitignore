@@ -32,4 +32,4 @@
 *.app
 database
 src/sic
-log
+# log
