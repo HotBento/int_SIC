@@ -30,6 +30,7 @@
 *.exe
 *.out
 *.app
+
 database
 src/sic
-# log
+picture
